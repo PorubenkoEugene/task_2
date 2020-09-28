@@ -104,7 +104,8 @@ let users = [
 ];
 
 function processUser(id) {
-    let random = (Math.floor(Math.random() * 10) + 1) * 100;
+    // let random = (Math.floor(Math.random() * 10) + 1) * 100;
+    let random = 2000;
     return new Promise((resolve, reject) => {
         setTimeout(() => {
             resolve(id);
@@ -113,21 +114,24 @@ function processUser(id) {
 }
 
 async function startRecursive(n = [],acc = 0) {
+    console.time('Time this')
+
     let users = [...n];
-    if(users.length === 0) return acc;
     async function reducePromiseResults(userPortion) {
         const arrayOfPromises = userPortion.map(item => processUser(item.id));
         const resultArray = await Promise.all(arrayOfPromises);
         return resultArray.reduce((acc,item) => acc + item, 0)
     }
+    if(users.length === 0) return acc;
     const tenUsersPortion = users.splice(0, 10);
     const sum = await reducePromiseResults(tenUsersPortion);
     return startRecursive(users,acc + sum);
 }
-startRecursive(users,0).then(r => console.log(r));
+startRecursive(users,0).then(r => console.timeEnd('Time this'));
 
 
 async function startRecursive2(usersArray=[],sum=0){
+    console.time('2')
     if(usersArray.length===0) return sum;
     const tenUsersPortion = users.slice(usersArray.length-10,usersArray.length);
     for await (const res of tenUsersPortion.map(({id}) => processUser(id))) {
@@ -136,7 +140,7 @@ async function startRecursive2(usersArray=[],sum=0){
     const cutArray = usersArray.slice(0,usersArray.length-10);
     return startRecursive2(cutArray,sum)
 }
-startRecursive2(users,0).then(sum=>console.log(sum+':2'),err=>console.log(err));
+startRecursive2(users,0).then(sum=>console.timeEnd('2'),err=>console.log(err));
 
 
 
